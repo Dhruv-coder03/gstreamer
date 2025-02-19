@@ -154,7 +154,18 @@ void
 gst_color_balance_set_value (GstColorBalance * balance,
     GstColorBalanceChannel * channel, gint value)
 {
-  GstColorBalanceInterface *iface = GST_COLOR_BALANCE_GET_INTERFACE (balance);
+  GstColorBalanceInterface *iface;
+  
+  g_return_if_fail (GST_IS_COLOR_BALANCE (balance));
+  g_return_if_fail (channel != NULL);
+  
+  // Add range validation
+  if (value < channel->min_value)
+    value = channel->min_value;
+  if (value > channel->max_value)
+    value = channel->max_value;
+
+  iface = GST_COLOR_BALANCE_GET_INTERFACE (balance);
 
   if (iface->set_value) {
     iface->set_value (balance, channel, value);
@@ -182,7 +193,7 @@ gst_color_balance_get_value (GstColorBalance * balance,
   GstColorBalanceInterface *iface;
 
   g_return_val_if_fail (GST_IS_COLOR_BALANCE (balance), 0);
-
+  g_return_val_if_fail (channel != NULL, 0);
   iface = GST_COLOR_BALANCE_GET_INTERFACE (balance);
 
   if (iface->get_value) {
@@ -233,7 +244,8 @@ gst_color_balance_value_changed (GstColorBalance * balance,
 {
 
   g_return_if_fail (GST_IS_COLOR_BALANCE (balance));
-
+  g_return_if_fail (channel != NULL);
+  
   g_signal_emit (G_OBJECT (balance),
       gst_color_balance_signals[VALUE_CHANGED], 0, channel, value);
 
